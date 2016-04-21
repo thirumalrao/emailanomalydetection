@@ -12,17 +12,7 @@ class Ngram:
     def __init__(self, path):
         self.path = path
 
-    def sequenceProcess(self):
-        tokens = self.loadCorpus()
-        preprocessedText = self.preprocessData(tokens)
-        stemmedWords = self.stemWords(preprocessedText)
-        bigramslist = self.createBigrams(stemmedWords)
-        trigramsList = self.createTrigrams(stemmedWords)
-        print type(bigramslist)
-        #posTaggedList = self.createPOSTagging(stemmedWords)
-        self.writeToFile(bigramslist, 'bigramList')
-        print 'length of bigramlist- %d ', len(bigramslist)
-        self.frequencyDistribution(stemmedWords,bigramslist,trigramsList)
+
 
 
     def loadCorpus(self):
@@ -101,23 +91,31 @@ class Ngram:
                 posTaggedList.append(posTagged)
         except Exception as e:
             print(str(e))
+        print 'POS tagging completed successfully'
         return posTaggedList
 
-    def frequencyDistribution(self,tokens,custom_bigrams,custom_trigrams):
+    def bigramfrequencyDistribution(self,tokens,custom_bigrams):
+        ''' will find frequency distribution for each bigram in the corpus and write to a file
+        :param tokens: words of corpus in type tokens
+        :param custom_bigrams: bigrams in type list
+        :return:void
+        '''
 
         uniqWords = sorted(set(tokens)) # Calculating unique words.
         print(len(uniqWords))
-
         all_words_Freq = nltk.FreqDist(uniqWords)
         bigrams_freq = nltk.FreqDist(custom_bigrams)
-        trigrams_freq = nltk.FreqDist(custom_trigrams)
-        for k,n in bigrams_freq.items():
-            print k,n
+        bigrams_freq_dict={}
+        for k,v in bigrams_freq.items():
+            bigrams_freq_dict[k]=v
+            #print(k,v)
+
+        return bigrams_freq_dict
 
 
     def writeToFile(self,text,filename):
         '''
-        :param text: this is a list of strings that needs to be written to the text
+        :param text: this is a list of strings that needs to be written to the file
         :param filename: name of the file to be created.
         :return: NA
         '''
@@ -126,6 +124,3 @@ class Ngram:
         for line in text:
             fileobject.write(' '.join(str(s) for s in line) + '\n')
         fileobject.close()
-
-if __name__ == '__main__':
-    Ngram('/Users/thirumal/Documents/iit/CS522/project/sampledata').sequenceProcess()

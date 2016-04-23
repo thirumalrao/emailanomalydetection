@@ -6,13 +6,13 @@ import os
 from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
+from ast import literal_eval
 
 
 class Ngram:
+
     def __init__(self, path):
         self.path = path
-
-
 
 
     def loadCorpus(self):
@@ -53,8 +53,8 @@ class Ngram:
                 stoppedWords.append(token)
 
         text = nltk.Text(stoppedWords)
-        words = [w.lower() for w in text if w.isalpha()]
-        words = [w for w in words if len(w) > 2]
+        #words = [w.lower() for w in text if w.isalpha()]
+        words = [w for w in text if len(w) > 2]
         print 'total words after removing stop words:' + str(len(words))
         return words
 
@@ -66,10 +66,17 @@ class Ngram:
         '''
         ps = PorterStemmer()
         stemmedWords=[]
+
         for w in text:
-            stemmedWords.append(ps.stem(w))
+            t = self.ensure_unicode(w)
+            stemmedWords.append(ps.stem(t))
 
         return stemmedWords
+
+    def ensure_unicode(v):
+        if isinstance(v, str):
+            v = v.decode('utf8')
+        return unicode(v)  # convert anything not a string to unicode too
 
     def createBigrams(self,tokens):
         custom_bigrams = list(nltk.bigrams(tokens))
@@ -124,3 +131,12 @@ class Ngram:
         for line in text:
             fileobject.write(' '.join(str(s) for s in line) + '\n')
         fileobject.close()
+
+    def writeDictToFile(self,dict,filename):
+        with open(filename+'.txt','w') as f:
+            f.write(dict)
+
+    def readDictFromFile(self,dict,filename):
+        with open(filename+'.txt','r') as f:
+            return literal_eval(f.read())
+

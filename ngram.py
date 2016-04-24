@@ -7,7 +7,8 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from ast import literal_eval
-
+import Analysis
+from Analysis import Analysis
 
 class Ngram:
 
@@ -56,6 +57,7 @@ class Ngram:
         #words = [w.lower() for w in text if w.isalpha()]
         words = [w for w in text if len(w) > 2]
         print 'total words after removing stop words:' + str(len(words))
+        Analysis().save_obj(words,'preprocessedData')
         return words
 
     def stemWords(self,text):
@@ -73,7 +75,7 @@ class Ngram:
 
         return stemmedWords
 
-    def ensure_unicode(v):
+    def ensure_unicode(self,v):
         if isinstance(v, str):
             v = v.decode('utf8')
         return unicode(v)  # convert anything not a string to unicode too

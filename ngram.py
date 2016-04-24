@@ -9,6 +9,9 @@ from nltk.stem import PorterStemmer
 from ast import literal_eval
 import Analysis
 from Analysis import Analysis
+from nltk import FreqDist
+import matplotlib.pyplot
+from matplotlib import pyplot
 
 class Ngram:
 
@@ -118,7 +121,7 @@ class Ngram:
         for k,v in bigrams_freq.items():
             bigrams_freq_dict[k]=v
             #print(k,v)
-
+            
         return bigrams_freq_dict
 
 
@@ -141,4 +144,8 @@ class Ngram:
     def readDictFromFile(self,dict,filename):
         with open(filename+'.txt','r') as f:
             return literal_eval(f.read())
-
+            
+    def plot_freq_dist_graphs(self, all_words_Freq, bigrams_freq):
+        FreqDist(all_words_Freq).plot(50, cumulative=False)
+        FreqDist(bigrams_freq).plot(50, cumulative=False)
+        FreqDist(trigrams_freq).plot(50, cumulative=False)

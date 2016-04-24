@@ -144,8 +144,9 @@ class Ngram:
     def readDictFromFile(self,dict,filename):
         with open(filename+'.txt','r') as f:
             return literal_eval(f.read())
-            
+    
+    #Plotting the graph for each:
     def plot_freq_dist_graphs(self, all_words_Freq, bigrams_freq):
         FreqDist(all_words_Freq).plot(50, cumulative=False)
         FreqDist(bigrams_freq).plot(50, cumulative=False)
-        FreqDist(trigrams_freq).plot(50, cumulative=False)
+        # FreqDist(trigrams_freq).plot(50, cumulative=False)

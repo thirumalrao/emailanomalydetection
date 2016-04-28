@@ -28,7 +28,7 @@ class Ngram:
         corpus_root = self.path
         rawcontent = PlaintextCorpusReader(corpus_root, ".*")
         reload(sys)
-        sys.setdefaultencoding('utf-8')
+        #sys.setdefaultencoding('utf-8')
         read_files = rawcontent._fileids
         print 'files to be read ' + str(read_files)
         with open("result.txt", "wb") as outfile:

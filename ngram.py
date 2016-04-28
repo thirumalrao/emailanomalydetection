@@ -9,6 +9,8 @@ from nltk.stem import PorterStemmer
 from ast import literal_eval
 import Analysis
 from Analysis import Analysis
+from nltk.tokenize import sent_tokenize
+import sys
 
 class Ngram:
 
@@ -22,18 +24,28 @@ class Ngram:
         '''
         corpus_root = self.path
         rawcontent = PlaintextCorpusReader(corpus_root, ".*")
-
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
         read_files = rawcontent._fileids
         print 'files to be read ' + str(read_files)
-
         with open("result.txt", "wb") as outfile:
             for f in read_files:
-                with open(os.path.join(self.path + '/' + f), "rb") as infile:
-                    outfile.write(infile.read())
+                if(f != '.DS_Store'):
+                    with open(os.path.join(self.path + '/' + f), "rb") as infile:
+                        outfile.write(infile.read())
         raw = open("result.txt").read()
         rawwords = nltk.wordpunct_tokenize(raw)
+        #sent_tokenize_list = sent_tokenize(raw)
         return rawwords
 
+    def createTokens(self,emailText):
+        '''
+
+        :param emailText: it is a string
+        :return: tokens of type list
+        '''
+        tokens = nltk.wordpunct_tokenize(emailText)
+        return tokens
 
 
     def preprocessData(self, tokens):
@@ -51,14 +63,13 @@ class Ngram:
         stop_words.update()
         for token in tokens:
             if token not in (stop_words):
+                t = self.ensure_unicode(token)
                 stoppedWords.append(token)
-
         text = nltk.Text(stoppedWords)
-        #words = [w.lower() for w in text if w.isalpha()]
-        words = [w for w in text if len(w) > 2]
-        print 'total words after removing stop words:' + str(len(words))
-        Analysis().save_obj(words,'preprocessedData')
-        return words
+        words = [w for w in text if w.isalpha()]
+        words_new = [w for w in words if len(w) > 2]
+        print 'total words after removing stop words:' + str(len(words_new))
+        return words_new
 
     def stemWords(self,text):
         '''
@@ -77,18 +88,16 @@ class Ngram:
 
     def ensure_unicode(self,v):
         if isinstance(v, str):
-            v = v.decode('utf8')
+            v = v.decode('latin-1')
         return unicode(v)  # convert anything not a string to unicode too
 
     def createBigrams(self,tokens):
         custom_bigrams = list(nltk.bigrams(tokens))
-        print 'bigrams created successfully'
         return custom_bigrams
 
 
     def createTrigrams(self,tokens):
         custom_trigrams = list(nltk.trigrams(tokens))
-        print 'trigrams created successfully'
         return custom_trigrams
 
     def createPOSTagging(self, tokens):
@@ -136,7 +145,7 @@ class Ngram:
 
     def writeDictToFile(self,dict,filename):
         with open(filename+'.txt','w') as f:
-            f.write(dict)
+            f.write(str(dict))
 
     def readDictFromFile(self,dict,filename):
         with open(filename+'.txt','r') as f:

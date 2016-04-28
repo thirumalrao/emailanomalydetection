@@ -12,7 +12,6 @@ import statistics
 class Analysis:
     def __init__(self):
         self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/sampledata')
-        self.logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
         self.emailbigramList = [line.strip() for line in open("emailbigramListFile.txt", 'r')]
         self.wikibigramList = [line.strip() for line in open("bigramListFile.txt", 'r')]
         self.wiki_bigram_count = globalconstants.WIKI_TOTAL_BIGRAM_COUNT
@@ -108,10 +107,9 @@ class Analysis:
         #new_model = Word2Vec.load(model_name)
         print 'total sentences:' + str(len(raw_sentences))
         b = model.most_similar(positive=['California'], negative=['man'])
-        print b
         #a = model.doesnt_match('California')
         a = model.doesnt_match("breakfast cereal dinner lunch".split())
-        print a
+
 
     def save_obj(self, obj, objname):
         '''
@@ -154,7 +152,6 @@ class Analysis:
         wikibigramfreq={}
         for testbigram in test_email_bigram:
             d = self.wikibigramList.count(testbigram)
-            print d
             wikibigramfreq[testbigram] = d
         return wikibigramfreq
 
@@ -164,13 +161,17 @@ class Analysis:
         :return: dictionary of bigrams and its corresponding frequency count in wiki corpus.
         '''
         emailbigramfreq={}
+        print 'test email bigram'
+        print test_email_bigram
         for testbigram in test_email_bigram:
+            print 'testbigram -- '
+            print testbigram
+            print 'length of email bigram list -- ' + str(len(self.emailbigramList))
             d = self.emailbigramList.count(testbigram)
-            print d
             emailbigramfreq[testbigram] = d
         return emailbigramfreq
 
-    def computeAnomalyScoreForEmail(self,wikibigramfreq,emailbigramfreq,testmailbigrams):
+    def computeAnomalyScoreForEmail(self,wikibigramfreq, emailbigramfreq, testmailbigrams):
         '''
         will compute anomaly score for an email by comparing bigram distribution in email dataset and wiki corpus
         :param wikibigramfreq: wikibigram frequency for test mail as python dictionary
@@ -180,8 +181,8 @@ class Analysis:
         '''
         wikiscore=0
         emailscore=0
-
-
+        wiki_count=0
+        email_count=0
         for test_bigram in testmailbigrams:
             if test_bigram in wikibigramfreq:
                 wiki_count = wikibigramfreq[test_bigram]
@@ -193,6 +194,30 @@ class Analysis:
         anomalyscore = statistics.stdev([wikiscore,emailscore])
         return anomalyscore
 
+    def tempsequence(self):
+        print datetime.now()
+        testemail = "You may already know this, but I wanted to keep you updated. All new commodity power business in California has been put on hold. Yesterday, \
+                    Eric Letke announced to the team of originators that we would be suspending \
+                    new efforts until the regulatory/legislative environment is more solid in \
+                    California.With that news, all of our team meetings and conference calls have been cancelled However I want to maintain a weekly call (30 min max) on our own....just to \
+                    keep-in-touch I will defer to your schedules Please tell me what day and hour looks best for you."
+        tokens = self.Ngram.createTokens(testemail)
+        bigrams = self.Ngram.createBigrams(tokens)
+        bigramlist=[]
+        for b in bigrams:
+            bigramlist.append(b[0]+' ' + b[1])
+        print bigramlist
+        print 'line 204----bigrams -- '
+        print bigramlist
+        emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
+        print 'email bigram frequency distribution'
+        print emailbigramfreq
+        wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
+        print 'wiki bigram frequency distribution'
+        print wikibigramfreq
+        score = self.computeAnomalyScoreForEmail(wikibigramfreq,emailbigramfreq,tokens)
+        print 'score = ' + str(score)
+        print datetime.now()
 
 if __name__ == '__main__':
-    Analysis().computeAnomalyScoreForEmail()
+    Analysis().tempsequence()

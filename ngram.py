@@ -11,6 +11,9 @@ import Analysis
 from Analysis import Analysis
 from nltk.tokenize import sent_tokenize
 import sys
+from nltk import FreqDist
+import matplotlib.pyplot
+from matplotlib import pyplot
 
 class Ngram:
 
@@ -35,7 +38,6 @@ class Ngram:
                         outfile.write(infile.read())
         raw = open("result.txt").read()
         rawwords = nltk.wordpunct_tokenize(raw)
-        #sent_tokenize_list = sent_tokenize(raw)
         return rawwords
 
     def createTokens(self,emailText):
@@ -65,6 +67,7 @@ class Ngram:
             if token not in (stop_words):
                 t = self.ensure_unicode(token)
                 stoppedWords.append(token)
+
         text = nltk.Text(stoppedWords)
         words = [w for w in text if w.isalpha()]
         words_new = [w for w in words if len(w) > 2]
@@ -127,7 +130,7 @@ class Ngram:
         for k,v in bigrams_freq.items():
             bigrams_freq_dict[k]=v
             #print(k,v)
-
+            
         return bigrams_freq_dict
 
 
@@ -145,7 +148,7 @@ class Ngram:
 
     def writeDictToFile(self,dict,filename):
         with open(filename+'.txt','w') as f:
-            f.write(str(dict))
+            f.write(dict)
 
     def readDictFromFile(self,dict,filename):
         with open(filename+'.txt','r') as f:

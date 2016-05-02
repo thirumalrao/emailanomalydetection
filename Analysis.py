@@ -12,7 +12,7 @@ import statistics
 
 class Analysis:
     def __init__(self):
-        self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/sampledata')
+        self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/dtoEmails_TextOnly')
         self.emailbigramList = [line.strip() for line in open("emailbigramListFile.txt", 'r')]
         self.wikibigramList = [line.strip() for line in open("bigramListFile.txt", 'r')]
         self.wiki_bigram_count = globalconstants.WIKI_TOTAL_BIGRAM_COUNT
@@ -26,33 +26,24 @@ class Analysis:
                 common.append(grams1)
         return common
 
-    def processDataAndCreateNgrams(self):
+    def preprocessEmailData(self):
         '''
         this method is used as a driver that calls different methods for processing data
         :return: void
         '''
         tokens = self.Ngram.loadCorpus()
         preprocessedText = self.Ngram.preprocessData(tokens)
-        print 'loaded preprocessedData.pkl successfully'
-        print type(preprocessedText)
-        stemmedWords = self.Ngram.stemWords(preprocessedText)
-        print 'stemming is successful, saving it in pickle now...'
-        self.save_obj(preprocessedText,'stemmedWords')
-        print 'saved in stemmedWords.pkl successfully'
-        words = self.load_obj('stemmedWords')
-        bigramslist = self.Ngram.createBigrams(words)
-        self.Ngram.writeToFile(bigramslist, 'bigramListFile')
-        trigramsList = self.Ngram.createTrigrams(words)
-        self.Ngram.writeToFile(trigramsList, 'trigramListFile')
-        self.save_obj(bigramslist, 'bigramsList')
-        self.save_obj(trigramsList, 'trigramsList')
-        posTaggedList = self.Ngram.createPOSTagging(stemmedWords)
-        print 'length of bigramlist- %d ', len(bigramslist)
-        bigramslist = self.load_obj('bigramsList')
-        bigram_freq_dist = self.Ngram.bigramfrequencyDistribution(words, bigramslist)
-        self.Ngram.writeDictToFile(bigram_freq_dist,'bigramFreqDict')
-        self.save_obj(bigram_freq_dist, 'bigramfreqdict')
-        bigram_freq = self.load_obj('bigramfreqdict')
+        stemmedwords = self.Ngram.stemWords(preprocessedText)
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        #bigramslist = self.Ngram.createBigrams(stemmedwords)
+        #print 'bigrams created successfully'
+        #print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        trigramslist = self.Ngram.createTrigrams(stemmedwords)
+        print 'trigrams created successfully'
+        self.Ngram.writeToFile(trigramslist, 'emailtrigramListFile')
+        print 'trigrams written to emailtrigramListFile.txt'
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
 
     def processDataforWikiCorpus(self):
         '''
@@ -198,7 +189,11 @@ class Analysis:
 
     def tempsequence(self):
         print datetime.now()
-        testemail = "min max"
+        testemail = "You may already know this, but I wanted to keep you updated.  All new \
+commodity (power) business in California has been put on hold.  Yesterday, \
+Eric Letke announced to the team of originators that we would be suspending \
+new efforts until the regulatory/legislative environment is more solid in \
+California."
         tokens = self.Ngram.createTokens(testemail)
         bigrams = self.Ngram.createBigrams(tokens)
         bigramlist=[]
@@ -215,4 +210,4 @@ class Analysis:
         print datetime.now()
 
 if __name__ == '__main__':
-    Analysis().tempsequence()
+    Analysis().preprocessEmailData()

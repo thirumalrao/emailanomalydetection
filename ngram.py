@@ -57,7 +57,11 @@ class Ngram:
         '''
 
         custom_stop_words = ['docID', 'segmentNumber', 'Body', 'X-From', 'X-To', 'X-cc', 'X-bcc', 'X-Folder',
-                             'X-Origin', 'X-FileName']
+                             'X-Origin', 'X-FileName','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday',
+                             'SECTION','Thanks','Content-Type','X-Origin','X-FileName','Mime-Version','Subject','From',
+                             'Content- Transfer-Encoding','Message-ID','enron','com','January','February','March','April',
+                             'May','June','July','August','September','October','November','December','enron.com','Inc.',
+                             'Moreover','U.S','Henry','News','Copyright']
         stoppedWords = []
         stop_words = set(stopwords.words("english"))
         for w in custom_stop_words:
@@ -68,11 +72,12 @@ class Ngram:
                 t = self.ensure_unicode(token)
                 stoppedWords.append(token)
 
-        text = nltk.Text(stoppedWords)
-        words = [w for w in text if w.isalpha()]
+
+        words = [w for w in stoppedWords if w.isalpha()]
         words_new = [w for w in words if len(w) > 2]
-        print 'total words after removing stop words:' + str(len(words_new))
-        return words_new
+        text = nltk.Text(words_new)
+        print 'total words after removing stop words:' + str(len(text))
+        return text
 
     def stemWords(self,text):
         '''

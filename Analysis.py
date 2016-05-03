@@ -8,6 +8,8 @@ from gensim.models import Word2Vec
 import logging
 import globalconstants
 import statistics
+import email
+from email.parser import Parser
 
 
 class Analysis:
@@ -35,7 +37,11 @@ class Analysis:
         this method is used as a driver that calls different methods for processing data
         :return: void
         '''
+        parser = Parser() # Added for extracting only the body of the email
         tokens = self.Ngram.loadCorpus()
+        msg = email.message_from_string(tokens) # Added for extracting only the body of the email
+        email = parser.parsestr(tokens) # Added for extracting only the body of the email
+        email_body_list = [email.split('Body:')[-1] for email in text1.split('##########################################################')] # Added for extracting only the body of the email
         preprocessedText = self.Ngram.preprocessData(tokens)
         stemmedwords = self.Ngram.stemWords(preprocessedText)
         print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')

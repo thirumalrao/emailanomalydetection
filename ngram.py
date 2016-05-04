@@ -78,7 +78,6 @@ class Ngram:
         for w in custom_stop_words:
             stop_words.add(w)
         stop_words.update()
-        print stop_words
         for token in tokens:
             if (token.lower() not in stop_words):
                 t = self.ensure_unicode(token)
@@ -88,7 +87,6 @@ class Ngram:
         words = [w for w in stoppedWords if w.isalpha()]
         words_new = [w for w in words if len(w) > 2]
         text = nltk.Text(words_new)
-        print 'total words after removing stop words:' + str(len(text))
         return text
 
     def stemWords(self,text):
@@ -164,8 +162,8 @@ class Ngram:
         fileobject.close()
 
     def writeDictToFile(self,dict,filename):
-        with open(filename+'.csv','w') as f:
-            f.write(dict)
+        with open(filename+'.txt','w') as f:
+            f.write(str(dict))
 
     def readDictFromFile(self,dict,filename):
         with open(filename+'.txt','r') as f:

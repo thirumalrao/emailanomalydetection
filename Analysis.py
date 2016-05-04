@@ -12,6 +12,8 @@ import email
 from email.parser import Parser
 import nltk
 import itertools
+import csv
+import sys
 
 
 class Analysis:
@@ -25,6 +27,11 @@ class Analysis:
         self.email_bigram_count = globalconstants.EMAIL_TOTAL_BIGRAM_COUNT
         self.wiki_trigram_count = globalconstants.WIKI_TOTAL_TRIGRAM_COUNT
         self.email_trigram_count = globalconstants.EMAIL_TOTAL_TRIGRAM_COUNT
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
+        logging.root.setLevel(level=logging.INFO)
+        logger.info("running %s" % ' '.join(sys.argv))
+
 
 
     def compareBigrams(self, bigrams1, bigrams2):
@@ -40,26 +47,17 @@ class Analysis:
         :return: void
         '''
         parser = Parser() # Added for extracting only the body of the email
-        print 'before load corpus'
-        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         tokens = self.Ngram.loadCorpus()
-        print 'after load corpus'
-        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         email = parser.parsestr(tokens) # Added for extracting only the body of the email
         email_body_list = [email.split('Body:')[-1] for email in tokens.split('##########################################################')] # Added for extracting only the body of the email
         tokendata=[]
-        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         for txt in email_body_list:
             tokendata.append(nltk.wordpunct_tokenize(txt))
         merged = list(itertools.chain.from_iterable(tokendata)) # flattening the tokendata which is a list of list.
-        print 'preprocessing starting..'
         preprocessedText = self.Ngram.preprocessData(merged)
-        print 'preprocessing successful'
         stemmedwords = self.Ngram.stemWords(preprocessedText)
         self.Ngram.writeToFile(stemmedwords,'preprocessedEmailBody')
-        print 'pos tagging starting..'
         posTaggedList = self.Ngram.createPOSTagging(stemmedwords)
-        print 'pos tagging completed..'
         preprocessedListwithoutNouns = self.Ngram.removeProperNouns(posTaggedList)
         print 'removed proper nouns'
         print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
@@ -186,7 +184,6 @@ class Analysis:
         :return: dictionary of bigrams and its corresponding frequency count in wiki corpus.
         '''
         emailbigramfreq={}
-        print 'test email bigram'
        # print test_email_bigram
         for testbigram in test_email_bigram:
            # print 'testbigram -- '
@@ -202,7 +199,6 @@ class Analysis:
         :return: dictionary of trigrams and its corresponding frequency count in wiki corpus.
         '''
         emailtrigramfreq = {}
-        print 'test email trigram'
         # print test_email_bigram
         for testtrigram in test_email_trigram:
             # print 'testbigram -- '
@@ -266,6 +262,8 @@ class Analysis:
         emailbodyDict = self.load_obj('emailBodyDict')
         bigramScoreDict={}
         trigramScoreDict={}
+        bigramwriter = csv.writer(open('bigramScore.csv', 'wb'))
+        trigramwriter = csv.writer(open('trigramScore.csv', 'wb'))
         for k,v in emailbodyDict.items():
             testemail = v
             tokens = self.Ngram.createTokens(testemail)
@@ -275,12 +273,14 @@ class Analysis:
             for b in bigrams:
                 bigramlist.append(b[0] + ' ' + b[1])
             emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
-            print 'email bigram frequency distribution'
-            print emailbigramfreq
+            #print 'email bigram frequency distribution'
+            #print emailbigramfreq
             wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
-            print 'wiki bigram frequency distribution'
-            print wikibigramfreq
+            #print 'wiki bigram frequency distribution'
+            #print wikibigramfreq
             bigramscore = self.computeAnomalyScoreForEmail_2grams(wikibigramfreq, emailbigramfreq, bigramlist)
+            bigramwriter.writerow([k, bigramscore])
+            print 'email no. - ' + str(k)
             print 'bigramscore = ' + str(bigramscore)
             bigramScoreDict[k] = bigramscore
 
@@ -289,18 +289,11 @@ class Analysis:
             for t in trigrams:
                 trigramlist.append(t[0] + ' ' + t[1] + ' ' + t[2])
             emailtrigramfreq = self.computeEmailTrigramFrequencyForTestMail(trigramlist)
-            print 'email trigram frequency distribution'
-            print emailtrigramfreq
             wikitrigramfreq = self.computeWikiTrigramFrequencyForTestMail(trigramlist)
-            print 'wiki trigram frequency distribution'
-            print wikitrigramfreq
             trigramscore = self.computeAnomalyScoreForEmail_3grams(wikitrigramfreq, emailtrigramfreq, trigramlist)
             print 'trigramscore = ' + str(trigramscore)
             trigramScoreDict[k] = trigramscore
-
-        self.Ngram.writeDictToFile(bigramScoreDict,'bigramScoreDict')
-        self.Ngram.writeDictToFile(trigramScoreDict,'trigramScoreDict')
-
+            trigramwriter.writerow([k,trigramscore])
 
 
 if __name__ == '__main__':

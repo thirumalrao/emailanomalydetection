@@ -10,14 +10,16 @@ import globalconstants
 import statistics
 import email
 from email.parser import Parser
+import nltk
+import itertools
 
 
 class Analysis:
     def __init__(self):
         self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/dtoEmails_TextOnly')
-        self.emailbigramList = [line.strip() for line in open("emailbigramListFile.txt", 'r')]
+        self.emailbigramList = [line.strip() for line in open("emailbigramList.txt", 'r')]
         self.wikibigramList = [line.strip() for line in open("bigramListFile.txt", 'r')]
-        self.emailtrigramList = [line.strip() for line in open("emailtrigramListFile.txt", 'r')]
+        self.emailtrigramList = [line.strip() for line in open("emailtrigramList.txt", 'r')]
         self.wikitrigramList = [line.strip() for line in open("trigramListFile.txt", 'r')]
         self.wiki_bigram_count = globalconstants.WIKI_TOTAL_BIGRAM_COUNT
         self.email_bigram_count = globalconstants.EMAIL_TOTAL_BIGRAM_COUNT
@@ -38,21 +40,39 @@ class Analysis:
         :return: void
         '''
         parser = Parser() # Added for extracting only the body of the email
+        print 'before load corpus'
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         tokens = self.Ngram.loadCorpus()
-        msg = email.message_from_string(tokens) # Added for extracting only the body of the email
+        print 'after load corpus'
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
         email = parser.parsestr(tokens) # Added for extracting only the body of the email
-        email_body_list = [email.split('Body:')[-1] for email in text1.split('##########################################################')] # Added for extracting only the body of the email
-        preprocessedText = self.Ngram.preprocessData(tokens)
+        email_body_list = [email.split('Body:')[-1] for email in tokens.split('##########################################################')] # Added for extracting only the body of the email
+        tokendata=[]
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        for txt in email_body_list:
+            tokendata.append(nltk.wordpunct_tokenize(txt))
+        merged = list(itertools.chain.from_iterable(tokendata)) # flattening the tokendata which is a list of list.
+        print 'preprocessing starting..'
+        preprocessedText = self.Ngram.preprocessData(merged)
+        print 'preprocessing successful'
         stemmedwords = self.Ngram.stemWords(preprocessedText)
+        self.Ngram.writeToFile(stemmedwords,'preprocessedEmailBody')
+        print 'pos tagging starting..'
+        posTaggedList = self.Ngram.createPOSTagging(stemmedwords)
+        print 'pos tagging completed..'
+        preprocessedListwithoutNouns = self.Ngram.removeProperNouns(posTaggedList)
+        print 'removed proper nouns'
         print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
-        #bigramslist = self.Ngram.createBigrams(stemmedwords)
-        #print 'bigrams created successfully'
-        #print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
-        trigramslist = self.Ngram.createTrigrams(stemmedwords)
+        bigramslist = self.Ngram.createBigrams(preprocessedListwithoutNouns)
+        print 'bigrams created successfully'
+        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        trigramslist = self.Ngram.createTrigrams(preprocessedListwithoutNouns)
         print 'trigrams created successfully'
-        self.Ngram.writeToFile(trigramslist, 'emailtrigramListFile')
-        print 'trigrams written to emailtrigramListFile.txt'
+        self.Ngram.writeToFile(bigramslist,'emailbigramList')
+        self.Ngram.writeToFile(trigramslist,'emailtrigramList')
         print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+
 
 
     def processDataforWikiCorpus(self):

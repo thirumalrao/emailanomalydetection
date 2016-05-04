@@ -7,13 +7,8 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from ast import literal_eval
-import Analysis
-from Analysis import Analysis
-from nltk.tokenize import sent_tokenize
 import sys
-from nltk import FreqDist
-import matplotlib.pyplot
-from matplotlib import pyplot
+from nltk.tag.util import untag
 
 class Ngram:
 
@@ -37,8 +32,8 @@ class Ngram:
                     with open(os.path.join(self.path + '/' + f), "rb") as infile:
                         outfile.write(infile.read())
         raw = open("result.txt").read()
-        rawwords = nltk.wordpunct_tokenize(raw)
-        return rawwords
+        #rawwords = nltk.wordpunct_tokenize(raw)
+        return raw
 
     def createTokens(self,emailText):
         '''
@@ -56,19 +51,21 @@ class Ngram:
         :return: preprocessed corpus that is devoid of punctuations and stop words. returns type nltk.text
         '''
 
-        custom_stop_words = ['docID', 'segmentNumber', 'Body', 'X-From', 'X-To', 'X-cc', 'X-bcc', 'X-Folder',
-                             'X-Origin', 'X-FileName','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday',
-                             'SECTION','Thanks','Content-Type','X-Origin','X-FileName','Mime-Version','Subject','From',
-                             'Content- Transfer-Encoding','Message-ID','enron','com','January','February','March','April',
-                             'May','June','July','August','September','October','November','December','enron.com','Inc.',
-                             'Moreover','U.S','Henry','News','Copyright']
+        custom_stop_words = ['docid', 'segmentnumber', 'body', 'x-from', 'x-to', 'x-cc', 'x-bcc', 'x-folder',
+                             'x-origin', 'x-fileName','monday','tuesday','wednesday','thursday','friday','saturday','sunday',
+                             'section','thanks','content-type','x-origin','c-fileName','mime-version','subject','from',
+                             'content- transfer-encoding','message-id','enron','com','january','february','march','april',
+                             'may','june','july','august','september','october','november','december','enron.com','inc.',
+                             'moreover','u.s','henry','news','copyright','mon','tue','wed','thu','fri','sat','sun','pdt','pst','jan','feb',
+                             'mar','apr','jun','jul','aug','sep','oct','nov','dec']
         stoppedWords = []
         stop_words = set(stopwords.words("english"))
         for w in custom_stop_words:
             stop_words.add(w)
         stop_words.update()
+        print stop_words
         for token in tokens:
-            if token not in (stop_words):
+            if (token.lower() not in stop_words):
                 t = self.ensure_unicode(token)
                 stoppedWords.append(token)
 
@@ -159,3 +156,17 @@ class Ngram:
         with open(filename+'.txt','r') as f:
             return literal_eval(f.read())
 
+    def createPOSTagging(self, tokens):
+        posTagged = nltk.pos_tag(tokens)
+        print ('POS tagging completed successfully')
+        #print (posTagged)
+        return posTagged
+
+    def removeProperNouns(self,postaggedList):
+        '''
+        removes proper nouns
+        :param postaggedList: this is a list of tuples. Example - [('Michael', 'NNP'), ('Jackson', 'NNP')]
+        :return: list of tuples which are not NNP or NNPS
+        '''
+        listWithoutNouns = [word for word,pos in postaggedList if pos not in ['NNP','NNPS']]
+        return listWithoutNouns

@@ -8,12 +8,18 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from ast import literal_eval
 import sys
-from nltk.tag.util import untag
+from email.parser import Parser
+
+import pickle
 
 class Ngram:
 
+    global email_body_list
+    email_body_list = []
+
     def __init__(self, path):
         self.path = path
+
 
 
     def loadCorpus(self):
@@ -32,7 +38,16 @@ class Ngram:
                     with open(os.path.join(self.path + '/' + f), "rb") as infile:
                         outfile.write(infile.read())
         raw = open("result.txt").read()
-        #rawwords = nltk.wordpunct_tokenize(raw)
+        parser = Parser()
+        email = parser.parsestr(raw)
+        email_body_dict = {}
+        i = 0
+        for email in raw.split('##########################################################'):
+            i += 1
+            email_body_list.append(email.split('Body:')[-1])
+            email_body_dict[i] = email.split('Body:')[-1]
+
+        self.save_obj(email_body_dict,'emailBodyDict')
         return raw
 
     def createTokens(self,emailText):
@@ -149,7 +164,7 @@ class Ngram:
         fileobject.close()
 
     def writeDictToFile(self,dict,filename):
-        with open(filename+'.txt','w') as f:
+        with open(filename+'.csv','w') as f:
             f.write(dict)
 
     def readDictFromFile(self,dict,filename):
@@ -170,3 +185,25 @@ class Ngram:
         '''
         listWithoutNouns = [word for word,pos in postaggedList if pos not in ['NNP','NNPS']]
         return listWithoutNouns
+
+
+    def save_obj(self, obj, objname):
+        '''
+        this method dumps the python object in a .pkl file
+        :param obj: python object that needs to be written to a file
+        :param objname: name that will be used to create a pkl file
+        :return: void
+        '''
+        with open(os.getcwd() + '/' + objname + '.pkl', 'wb') as f:
+            pickle.dump(obj, f)
+        f.close()
+
+    def load_obj(self, objname):
+        '''
+        retrieves a pkl file and converts back into a python object
+        :param objname: name of the pkl file
+        :return: pkl file content in the form of a python object
+        '''
+        with open(os.getcwd() + '/' + objname + '.pkl', 'rb') as f:
+            return pickle.load(f)
+

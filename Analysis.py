@@ -16,7 +16,7 @@ import itertools
 
 class Analysis:
     def __init__(self):
-        self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/dtoEmails_TextOnly')
+        self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/emailsampledata')
         self.emailbigramList = [line.strip() for line in open("emailbigramList.txt", 'r')]
         self.wikibigramList = [line.strip() for line in open("bigramListFile.txt", 'r')]
         self.emailtrigramList = [line.strip() for line in open("emailtrigramList.txt", 'r')]
@@ -103,17 +103,7 @@ class Analysis:
         self.save_obj(trigramsList, 'trigramsList')
         print 'bigram and trigram saved as pkl file successfully'
         print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
-        #bigramslist = self.load_obj('bigramsList')
-        print 'bigram Frequency distribution computation will be started...'
-        bigram_freq_dist = self.Ngram.bigramfrequencyDistribution(words, bigramslist)
-        print 'bigram frequency distribution completed successfully'
-        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
-        self.Ngram.writeDictToFile(bigram_freq_dist,'bigramFreqDict')
-        print 'bigram frequency distribution written to file succesfully '
-        self.save_obj(bigram_freq_dist, 'bigramfreqdict')
-        print 'bigram frequency distribution saved as pkl file'
-        #bigram_freq = self.load_obj('bigramfreqdict')
-        print datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')
+        bigramslist = self.load_obj('bigramsList')
         print '--------------wiki corpus processing completed -------------------'
 
 
@@ -271,91 +261,30 @@ class Analysis:
     def tempsequence(self):
         print datetime.now()
 
-        a = "Not attending:  Drew Ries, Bob Johansen, Trang Dinh\
-George Wasaff\
-Kelly Higgason accepted a position to work for EES effective Jan. 1.  Looking\
-for a new Asst. Gral. Counsel.\
-Kim Rizzi validated her resignation last week.  For HR needs we will make\
-contact with Dave Schafer's office.\
-Ken Smith left the company last week to pursue new opportunities.  John to\
-circulate memo.  Position open in Platforms & Processes.\
-Staffing.  Juanita Andrade was the candidate selected for the Sr. Admin. \
-Asst. position.  Leticia Flores to be considered for upgrade in Zhang's group.\
-People Plan.  Meeting today at 10.30 AM with Bob Reimer and Don Miller.\
-KGW will be off the rest of the year.  Derryl to lead next Monday's meeting.\
-New floor tech.  For assistance, call the Resolution Center at 3-1411.\
-Derryl Cleaveland\
-Cynthia Barrows asked Bruce to contact auto makers for options on hybrid\
-automobiles.\
-DealBench.  e-Commerce conference for construction services will be held this\
-week.  Background on infrastructure GSS can provide needed.  John Will to \
-contact each team to get input.  Looking to use DealBench on Nuovo Pignone\
-Phase V units.  Phil Foster in Italy meeting with transport cos.\
-FreeMarkets.  Glen Meaken has started discussions with KGW.\
-Sonoco.  Craig and EES to engage Enron on products Sonoco offers to assist on\
-improving their operations.  Also looking for assistance to improve their\
-procurement strategy.\
-Nepco.  Opportunities continue.  Will meet with Greg again this week.  Nepco\
-Europe willing to help as well.\
-Analysts revised savings methodology.  Met with Rick Buy's group to \
-incorporate what they use on origination projects.  Will also take a look at\
-a course for analysts on how to look and analyze new deals.\
-Outlook migration scheduled for Dec. 18 and 19.  Notes will need to be\
-cleaned up.\
-John Gillespie\
-iBuyIt.  ETS and Steve Kean's organization (HR, Communications, Govmt. \
-Affairs, NA) will try it.  Will contact Steve to get point person.  Active\
-fronts:  EBS, EES, and Global IT.\
-Andersen Consulting Off Site Re:  e-Commerce postponed until after the\
-holidays.\
-Peregrine.  Will talk with KGW off line.\
-Kelly Higgason\
-Kathy Clark starts today.\
-Finalized agreements with Corestaff and GE Capital.\
-Trying to close on Citibank and Cooper Cameron.\
-Derryl to take a look at Contract Administration on how to manage the area.\
-Calvin Eakins\
-Cathy Riley contacted prime suppliers on 2nd tier.\
-Progress on mentoring plan.  Formed committee.  Talked with Tony last week.\
-Meeting with him and Beth this week Re:  Branding and Mentoring Program.\
-Diversity Task Force.  Number one issue on survey is the need to do a better \
-job on promoting and hiring and retention of women and minorities.  If anyone \
-would like to view the 2000 Diversity Survey results, please stop by Calvin's\
-office.  Diversity Task Force will be merged into the Vision & Values Task\
-Force.\
-Jennifer Medcalf\
-Will prepare a trip report on trip to Europe.  Met with Brian Stanley Re:  \
-Bringing in some of their spend, John Sheriff (asked for periodic e-mail with\
-update), EBS (will set up conference calls), Shirley McCain Re:  Cellular,\
-Beth Apollo (coming back to the US), Etol.\
-EBS.  Re:  BMC, will contact Brad.\
-Sony Electronics.  Final negotiation of confidentiality agreement Re:  Energy\
-consumption.\
-Compaq.  Meeting scheduled. \
-SAP.  Commerce 1 and them had conference call.  Nothing for EBS at this point.\
-Sam Kemp.  There might be an opportunity for him to move into GSS or have a\
-GSS representation in Europe."
+        rawtext = self.Ngram.loadCorpus()
 
-        testemail_list = [a]
-
-        for i in testemail_list:
-            testemail = i
+        emailbodyDict = self.load_obj('emailBodyDict')
+        bigramScoreDict={}
+        trigramScoreDict={}
+        for k,v in emailbodyDict.items():
+            testemail = v
             tokens = self.Ngram.createTokens(testemail)
+            preprocessdata = self.Ngram.preprocessData(tokens)
+            bigrams = self.Ngram.createBigrams(preprocessdata)
+            bigramlist = []
+            for b in bigrams:
+                bigramlist.append(b[0] + ' ' + b[1])
+            emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
+            print 'email bigram frequency distribution'
+            print emailbigramfreq
+            wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
+            print 'wiki bigram frequency distribution'
+            print wikibigramfreq
+            bigramscore = self.computeAnomalyScoreForEmail_2grams(wikibigramfreq, emailbigramfreq, bigramlist)
+            print 'bigramscore = ' + str(bigramscore)
+            bigramScoreDict[k] = bigramscore
 
-          #  bigrams = self.Ngram.createBigrams(tokens)
-          #  bigramlist = []
-          #  for b in bigrams:
-          #      bigramlist.append(b[0] + ' ' + b[1])
-          #  emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
-          #  print 'email bigram frequency distribution'
-          #  print emailbigramfreq
-          #  wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
-          #  print 'wiki bigram frequency distribution'
-          #  print wikibigramfreq
-          #  score = self.computeAnomalyScoreForEmail_2grams(wikibigramfreq, emailbigramfreq, bigramlist)
-          #  print 'score = ' + str(score)
-
-            trigrams = self.Ngram.createTrigrams(tokens)
+            trigrams = self.Ngram.createTrigrams(preprocessdata)
             trigramlist = []
             for t in trigrams:
                 trigramlist.append(t[0] + ' ' + t[1] + ' ' + t[2])
@@ -365,27 +294,14 @@ GSS representation in Europe."
             wikitrigramfreq = self.computeWikiTrigramFrequencyForTestMail(trigramlist)
             print 'wiki trigram frequency distribution'
             print wikitrigramfreq
-            score = self.computeAnomalyScoreForEmail_3grams(wikitrigramfreq, emailtrigramfreq, trigramlist)
-            print 'score = ' + str(score)
-        testemail = "You may already know this, but I wanted to keep you updated.  All new \
-commodity (power) business in California has been put on hold.  Yesterday, \
-Eric Letke announced to the team of originators that we would be suspending \
-new efforts until the regulatory/legislative environment is more solid in \
-California."
-        tokens = self.Ngram.createTokens(testemail)
-        bigrams = self.Ngram.createBigrams(tokens)
-        bigramlist=[]
-        for b in bigrams:
-            bigramlist.append(b[0]+' '+ b[1])
-        emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
-        print 'email bigram frequency distribution'
-        print emailbigramfreq
-        wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
-        print 'wiki bigram frequency distribution'
-        print wikibigramfreq
-        score = self.computeAnomalyScoreForEmail(wikibigramfreq,emailbigramfreq,bigramlist)
-        print 'score = ' + str(score)
-        print datetime.now()
+            trigramscore = self.computeAnomalyScoreForEmail_3grams(wikitrigramfreq, emailtrigramfreq, trigramlist)
+            print 'trigramscore = ' + str(trigramscore)
+            trigramScoreDict[k] = trigramscore
+
+        self.Ngram.writeDictToFile(bigramScoreDict,'bigramScoreDict')
+        self.Ngram.writeDictToFile(trigramScoreDict,'trigramScoreDict')
+
+
 
 if __name__ == '__main__':
-    Analysis().preprocessEmailData()
+    Analysis().tempsequence()

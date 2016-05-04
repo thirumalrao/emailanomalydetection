@@ -17,8 +17,8 @@ import sys
 
 
 class Analysis:
-    def __init__(self):
-        self.Ngram = ngram.Ngram('/Users/thirumal/Documents/iit/CS522/project/emailsampledata')
+    def __init__(self,path):
+        self.Ngram = ngram.Ngram(path)
         self.emailbigramList = [line.strip() for line in open("emailbigramList.txt", 'r')]
         self.wikibigramList = [line.strip() for line in open("bigramListFile.txt", 'r')]
         self.emailtrigramList = [line.strip() for line in open("emailtrigramList.txt", 'r')]
@@ -27,10 +27,7 @@ class Analysis:
         self.email_bigram_count = globalconstants.EMAIL_TOTAL_BIGRAM_COUNT
         self.wiki_trigram_count = globalconstants.WIKI_TOTAL_TRIGRAM_COUNT
         self.email_trigram_count = globalconstants.EMAIL_TOTAL_TRIGRAM_COUNT
-        logger = logging.getLogger(__name__)
-        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
-        logging.root.setLevel(level=logging.INFO)
-        logger.info("running %s" % ' '.join(sys.argv))
+
 
 
 
@@ -256,7 +253,10 @@ class Analysis:
 
     def tempsequence(self):
         print datetime.now()
-
+        logger = logging.getLogger(__name__)
+        logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
+        logging.root.setLevel(level=logging.INFO)
+        logger.info("running %s" % ' '.join(sys.argv))
         rawtext = self.Ngram.loadCorpus()
 
         emailbodyDict = self.load_obj('emailBodyDict')
@@ -297,4 +297,8 @@ class Analysis:
 
 
 if __name__ == '__main__':
-    Analysis().tempsequence()
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s')
+    logging.root.setLevel(level=logging.DEBUG)
+    logger.info("running %s" % ' '.join(sys.argv))
+    Analysis(sys.argv[1]).tempsequence()

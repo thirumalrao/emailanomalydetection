@@ -265,35 +265,36 @@ class Analysis:
         bigramwriter = csv.writer(open('bigramScore.csv', 'wb'))
         trigramwriter = csv.writer(open('trigramScore.csv', 'wb'))
         for k,v in emailbodyDict.items():
-            testemail = v
-            tokens = self.Ngram.createTokens(testemail)
-            preprocessdata = self.Ngram.preprocessData(tokens)
-            bigrams = self.Ngram.createBigrams(preprocessdata)
-            bigramlist = []
-            for b in bigrams:
-                bigramlist.append(b[0] + ' ' + b[1])
-            emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
-            #print 'email bigram frequency distribution'
-            #print emailbigramfreq
-            wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
-            #print 'wiki bigram frequency distribution'
-            #print wikibigramfreq
-            bigramscore = self.computeAnomalyScoreForEmail_2grams(wikibigramfreq, emailbigramfreq, bigramlist)
-            bigramwriter.writerow([k, bigramscore])
-            print 'email no. - ' + str(k)
-            print 'bigramscore = ' + str(bigramscore)
-            bigramScoreDict[k] = bigramscore
+            if (len(v.split()) < 150):
+                testemail = v
+                tokens = self.Ngram.createTokens(testemail)
+                preprocessdata = self.Ngram.preprocessData(tokens)
+                bigrams = self.Ngram.createBigrams(preprocessdata)
+                bigramlist = []
+                for b in bigrams:
+                    bigramlist.append(b[0] + ' ' + b[1])
+                emailbigramfreq = self.computeEmailBigramFrequencyForTestMail(bigramlist)
+                #print 'email bigram frequency distribution'
+                #print emailbigramfreq
+                wikibigramfreq = self.computeWikiBigramFrequencyForTestMail(bigramlist)
+                #print 'wiki bigram frequency distribution'
+                #print wikibigramfreq
+                bigramscore = self.computeAnomalyScoreForEmail_2grams(wikibigramfreq, emailbigramfreq, bigramlist)
+                bigramwriter.writerow([k, bigramscore])
+                print 'email no. - ' + str(k)
+                print 'bigramscore = ' + str(bigramscore)
+                bigramScoreDict[k] = bigramscore
 
-            trigrams = self.Ngram.createTrigrams(preprocessdata)
-            trigramlist = []
-            for t in trigrams:
-                trigramlist.append(t[0] + ' ' + t[1] + ' ' + t[2])
-            emailtrigramfreq = self.computeEmailTrigramFrequencyForTestMail(trigramlist)
-            wikitrigramfreq = self.computeWikiTrigramFrequencyForTestMail(trigramlist)
-            trigramscore = self.computeAnomalyScoreForEmail_3grams(wikitrigramfreq, emailtrigramfreq, trigramlist)
-            print 'trigramscore = ' + str(trigramscore)
-            trigramScoreDict[k] = trigramscore
-            trigramwriter.writerow([k,trigramscore])
+                trigrams = self.Ngram.createTrigrams(preprocessdata)
+                trigramlist = []
+                for t in trigrams:
+                    trigramlist.append(t[0] + ' ' + t[1] + ' ' + t[2])
+                emailtrigramfreq = self.computeEmailTrigramFrequencyForTestMail(trigramlist)
+                wikitrigramfreq = self.computeWikiTrigramFrequencyForTestMail(trigramlist)
+                trigramscore = self.computeAnomalyScoreForEmail_3grams(wikitrigramfreq, emailtrigramfreq, trigramlist)
+                print 'trigramscore = ' + str(trigramscore)
+                trigramScoreDict[k] = trigramscore
+                trigramwriter.writerow([k,trigramscore])
 
 
 if __name__ == '__main__':
